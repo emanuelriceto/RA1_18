@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
 
-class ErroLexico(Exception):
+class Erros(Exception):
     pass
 
 
@@ -40,6 +40,10 @@ def _eh_maiuscula(char: str) -> bool:
     return "A" <= char <= "Z"
 
 
+def _eh_minuscula(char: str) -> bool:
+    return "a" <= char <= "z"
+
+
 def _adicionar_token(contexto: Dict, tipo: str, valor: str) -> None:
     contexto["tokens"].append(
         Token(tipo=tipo, valor=valor, linha=contexto["linha"], coluna=contexto["inicio_token"] + 1)
@@ -59,7 +63,7 @@ def estado_inicial(char: str, contexto: Dict) -> Tuple[str, bool]:
     if char == ")":
         contexto["inicio_token"] = contexto["i"]
         if contexto["paren"] <= 0:
-            raise ErroLexico(f"Linha {contexto['linha']}: ')' sem '(' correspondente")
+            raise Erros(f"Linha {contexto['linha']}: ')' sem '(' correspondente")
         contexto["paren"] -= 1
         _adicionar_token(contexto, TIPO_FECHA, ")")
         return "inicial", True
@@ -84,7 +88,17 @@ def estado_inicial(char: str, contexto: Dict) -> Tuple[str, bool]:
         contexto["inicio_token"] = contexto["i"]
         return "barra", True
 
-    raise ErroLexico(f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: caractere inválido '{char}'")
+    if char == ".":
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: número malformado — ponto sem dígito antes"
+        )
+
+    if _eh_minuscula(char):
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: identificadores devem usar apenas letras maiúsculas, encontrado '{char}'"
+        )
+
+    raise Erros(f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: caractere inválido '{char}'")
 
 
 def estado_numero(char: str, contexto: Dict) -> Tuple[str, bool]:
@@ -95,6 +109,12 @@ def estado_numero(char: str, contexto: Dict) -> Tuple[str, bool]:
     if char == ".":
         contexto["buffer"] += char
         return "numero_decimal", True
+
+    if _eh_maiuscula(char) or _eh_minuscula(char):
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: "
+            f"número malformado '{contexto['buffer'] + char}' — letra imediatamente após número"
+        )
 
     _adicionar_token(contexto, TIPO_NUMERO, contexto["buffer"])
     contexto["buffer"] = ""
@@ -107,13 +127,21 @@ def estado_numero_decimal(char: str, contexto: Dict) -> Tuple[str, bool]:
         return "numero_decimal", True
 
     if char == ".":
-        raise ErroLexico(
-            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: número malformado '{contexto['buffer'] + char}'"
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: "
+            f"número malformado '{contexto['buffer'] + char}' — múltiplos pontos decimais"
         )
 
     if contexto["buffer"].endswith("."):
-        raise ErroLexico(
-            f"Linha {contexto['linha']}, coluna {contexto['i']}: número malformado '{contexto['buffer']}'"
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i']}: "
+            f"número malformado '{contexto['buffer']}' — ponto decimal sem dígitos depois"
+        )
+
+    if _eh_maiuscula(char) or _eh_minuscula(char):
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: "
+            f"número malformado '{contexto['buffer'] + char}' — letra imediatamente após número"
         )
 
     _adicionar_token(contexto, TIPO_NUMERO, contexto["buffer"])
@@ -125,6 +153,18 @@ def estado_identificador(char: str, contexto: Dict) -> Tuple[str, bool]:
     if _eh_maiuscula(char):
         contexto["buffer"] += char
         return "identificador", True
+
+    if _eh_minuscula(char):
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: "
+            f"identificador '{contexto['buffer'] + char}' contém letra minúscula — use apenas maiúsculas"
+        )
+
+    if _eh_digito(char):
+        raise Erros(
+            f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: "
+            f"identificador '{contexto['buffer'] + char}' contém dígito — use apenas letras maiúsculas"
+        )
 
     valor = contexto["buffer"]
     if valor == "RES":
@@ -152,7 +192,7 @@ def _finalizar(contexto: Dict, estado: str) -> None:
         _adicionar_token(contexto, TIPO_NUMERO, contexto["buffer"])
     elif estado == "numero_decimal":
         if contexto["buffer"].endswith("."):
-            raise ErroLexico(f"Linha {contexto['linha']}: número malformado '{contexto['buffer']}'")
+            raise Erros(f"Linha {contexto['linha']}: número malformado '{contexto['buffer']}'")
         _adicionar_token(contexto, TIPO_NUMERO, contexto["buffer"])
     elif estado == "identificador":
         valor = contexto["buffer"]
@@ -164,7 +204,7 @@ def _finalizar(contexto: Dict, estado: str) -> None:
         _adicionar_token(contexto, TIPO_OPERADOR, "/")
 
     if contexto["paren"] != 0:
-        raise ErroLexico(f"Linha {contexto['linha']}: parênteses desbalanceados")
+        raise Erros(f"Linha {contexto['linha']}: parênteses desbalanceados")
 
 
 def tokenizar_linha(linha: str, numero_linha: int = 1) -> List[Token]:
