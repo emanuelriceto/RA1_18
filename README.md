@@ -334,8 +334,6 @@ O AFD detecta e reporta com posição exata (linha e coluna):
 | `)` sem `(` | `3 2 +)` | `')' sem '(' correspondente` |
 | `(` sem `)` | `(3 2 +` | `parênteses desbalanceados` |
 
-A documentação completa (diagrama de estados, definição formal) está em [`docs/FSM_LEXER.md`](docs/FSM_LEXER.md).
-
 ---
 
 ## Detalhes Técnicos
