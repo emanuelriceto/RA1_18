@@ -1,1 +1,2 @@
 # Analisador_Lexico-Compiladores
+Emanuel
