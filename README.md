@@ -1,4 +1,4 @@
-# Fase 1 — Analisador Léxico e Gerador de Assembly ARMv7 (DE1-SoC v16.1)
+# RA1 18 Linguagens Formais e Compiladores
 
 | | |
 |---|---|
