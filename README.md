@@ -224,7 +224,7 @@ As cinco funções exigidas pelo enunciado estão em `src/pipeline.py`:
 ### Execução principal
 
 ```bash
-python main.py exemplos/teste1.txt
+python main.py teste1.txt
 ```
 
 Os arquivos de saída são gerados automaticamente em `output/`:
@@ -234,7 +234,7 @@ Os arquivos de saída são gerados automaticamente em `output/`:
 Caminhos personalizados:
 
 ```bash
-python main.py exemplos/teste2.txt --out output/teste2.s --tokens-out output/tokens_teste2.txt
+python main.py teste2.txt --out output/teste2.s --tokens-out output/tokens_teste2.txt
 ```
 
 ### Testes automatizados
