@@ -8,7 +8,7 @@
 # Disciplina: Linguagens Formais e Compiladores
 # Professor: Frank Coelho de Alcantara
 
-from typing import Dict, List, Tuple, Any
+
 
 from .lexer_fsm import (
     Token,
@@ -27,7 +27,7 @@ from .armv7_generator import gerar_assembly_armv7
 # Interface: recebe uma linha de texto e retorna um vetor de tokens.
 # Usa o AFD de lexer_fsm.py (sem regex) para tokenização.
 
-def parseExpressao(linha: str, tokens_saida: List[str]) -> List[Token]:
+def parseExpressao(linha: str, tokens_saida: list[str]) -> list[Token]:
     """Analisa uma linha de expressão RPN e extrai tokens via AFD.
 
     Recebe uma linha de texto, faz análise léxica
@@ -58,7 +58,7 @@ def _eh_numero_inteiro_literal(valor: str) -> bool:
     return len(valor) > 0
 
 
-def _parse_item(tokens: List[Token], i: int) -> Tuple[Dict[str, Any], int]:
+def _parse_item(tokens: list[Token], i: int) -> tuple[dict[str, any], int]:
     """Analisa um item individual da expressão RPN: número, identificador,
     keyword ou sub-expressão entre parênteses (aninhamento sem limites)."""
     if i >= len(tokens):
@@ -84,7 +84,7 @@ def _parse_item(tokens: List[Token], i: int) -> Tuple[Dict[str, Any], int]:
     raise Erros(f"Token inesperado: {token.valor}")
 
 
-def _parse_expr(tokens: List[Token], i: int) -> Tuple[Dict[str, Any], int]:
+def _parse_expr(tokens: list[Token], i: int) -> tuple[dict[str, any], int]:
     """Analisa uma expressão RPN completa no formato (A B op).
 
     Reconhece os seguintes formatos:
@@ -148,7 +148,7 @@ def _parse_expr(tokens: List[Token], i: int) -> Tuple[Dict[str, Any], int]:
     return {"tipo": "binary", "op": op.valor, "esq": primeiro, "dir": segundo}, i
 
 
-def _arvore_de_tokens(tokens: List[Token]) -> Dict[str, Any]:
+def _arvore_de_tokens(tokens: list[Token]) -> dict[str, any]:
     """Converte a lista de tokens em árvore sintática abstrata (AST).
     Valida que não sobram tokens após o parsing da expressão."""
     arvore, i = _parse_expr(tokens, 0)
@@ -162,7 +162,7 @@ def _arvore_de_tokens(tokens: List[Token]) -> Dict[str, Any]:
 # Os cálculos são delegados ao código Assembly ARMv7 gerado.
 
 
-def executarExpressao(tokens: List[Token], contexto: Dict[str, Any]) -> Dict[str, Any]:
+def executarExpressao(tokens: list[Token], contexto: dict[str, any]) -> dict[str, any]:
     """Processa tokens e valida a semântica da expressão.
 
     Gerencia memória MEM para comandos (V MEM) e (MEM),
@@ -213,7 +213,7 @@ def executarExpressao(tokens: List[Token], contexto: Dict[str, Any]) -> Dict[str
 # Gera código Assembly ARMv7 compatível com CPUlator DE1-SoC v16.1.
 # O Assembly gerado realiza TODOS os cálculos (IEEE 754 64 bits).
 
-def gerarAssembly(tokens_por_linha: List[List[Token]], codigoAssembly: str = "") -> str:
+def gerarAssembly(tokens_por_linha: list[list[Token]], codigoAssembly: str = "") -> str:
     """Gera código Assembly ARMv7 a partir dos vetores de tokens.
 
     Recebe o vetor de tokens gerado pelo analisador
@@ -234,7 +234,7 @@ def gerarAssembly(tokens_por_linha: List[List[Token]], codigoAssembly: str = "")
 
 # Exibe os resultados das expressões processadas no console.
 
-def exibirResultados(resultados: List[Dict[str, Any]]) -> None:
+def exibirResultados(resultados: list[dict[str, any]]) -> None:
     """Exibe os resultados das expressões no console.
 
     Exibe resultados com formato claro.
@@ -246,7 +246,7 @@ def exibirResultados(resultados: List[Dict[str, Any]]) -> None:
 
 # Lê o arquivo de texto com expressões RPN (uma por linha).
 
-def lerArquivo(nomeArquivo: str, linhas: List[str]) -> None:
+def lerArquivo(nomeArquivo: str, linhas: list[str]) -> None:
     """Lê o arquivo de entrada com expressões RPN.
 
     Lê um arquivo de texto contendo

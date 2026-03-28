@@ -23,7 +23,6 @@
 
 import argparse
 from pathlib import Path
-from typing import List
 
 from src.pipeline import parseExpressao, executarExpressao, gerarAssembly, exibirResultados, lerArquivo
 
@@ -59,7 +58,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # lerArquivo: lê expressões RPN do arquivo
-    linhas: List[str] = []
+    linhas: list[str] = []
     lerArquivo(args.arquivo, linhas)
 
     # Contexto compartilhado entre expressões: memória e histórico
@@ -70,7 +69,7 @@ def main() -> None:
 
     # parseExpressao + executarExpressao para cada linha
     for linha in linhas:
-        tokens_linha: List[str] = []
+        tokens_linha: list[str] = []
         # análise léxica via AFD
         tokens_obj = parseExpressao(linha, tokens_linha)
         # validação semântica sem realizar cálculos

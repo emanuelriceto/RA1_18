@@ -29,7 +29,6 @@
 # Para visualizar melhor o AFD foi criado um diagrama de estados finitos 
 
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
 
 class Erros(Exception):
     """Exceção para erros léxicos detectados pelo AFD."""
@@ -73,7 +72,7 @@ def _eh_minuscula(char: str) -> bool:
     """Verifica se o caractere é letra minúscula [a-z] sem usar regex."""
     return "a" <= char <= "z"
 
-def _adicionar_token(contexto: Dict, tipo: str, valor: str) -> None:
+def _adicionar_token(contexto: dict, tipo: str, valor: str) -> None:
     """Cria um Token e adiciona à lista de tokens no contexto do AFD."""
     contexto["tokens"].append(
         Token(tipo=tipo, valor=valor, linha=contexto["linha"], coluna=contexto["inicio_token"] + 1)
@@ -86,7 +85,7 @@ def _adicionar_token(contexto: Dict, tipo: str, valor: str) -> None:
 # Quando avançar_cursor=False, o caractere é reprocessado no próximo estado.
 
 
-def estado_inicial(char: str, contexto: Dict) -> Tuple[str, bool]:
+def estado_inicial(char: str, contexto: dict) -> tuple[str, bool]:
     """Estado inicial do AFD — classifica o primeiro caractere de cada token.
 
     Transições:
@@ -161,7 +160,7 @@ def estado_inicial(char: str, contexto: Dict) -> Tuple[str, bool]:
     raise Erros(f"Linha {contexto['linha']}, coluna {contexto['i'] + 1}: caractere inválido '{char}'")
 
 
-def estado_numero(char: str, contexto: Dict) -> Tuple[str, bool]:
+def estado_numero(char: str, contexto: dict) -> tuple[str, bool]:
     """Estado 'numero' — acumula dígitos da parte inteira de um número.
 
     Transições:
@@ -194,7 +193,7 @@ def estado_numero(char: str, contexto: Dict) -> Tuple[str, bool]:
     return "inicial", False
 
 
-def estado_numero_decimal(char: str, contexto: Dict) -> Tuple[str, bool]:
+def estado_numero_decimal(char: str, contexto: dict) -> tuple[str, bool]:
     """Estado 'numero_decimal' — acumula dígitos após o ponto decimal.
 
     Números reais usam ponto como separador (ex.: 3.14).
@@ -238,7 +237,7 @@ def estado_numero_decimal(char: str, contexto: Dict) -> Tuple[str, bool]:
     return "inicial", False
 
 
-def estado_identificador(char: str, contexto: Dict) -> Tuple[str, bool]:
+def estado_identificador(char: str, contexto: dict) -> tuple[str, bool]:
     """Estado 'identificador' — acumula letras maiúsculas para nomes de memória.
 
     Reconhece identificadores (MEM, VARA, TEMP, etc.) e a keyword RES.
@@ -281,7 +280,7 @@ def estado_identificador(char: str, contexto: Dict) -> Tuple[str, bool]:
     return "inicial", False
 
 
-def estado_barra(char: str, contexto: Dict) -> Tuple[str, bool]:
+def estado_barra(char: str, contexto: dict) -> tuple[str, bool]:
     """Estado 'barra' — diferencia divisão real '/' de divisão inteira '//'.
 
     O enunciado exige suporte a ambos os operadores:
@@ -304,7 +303,7 @@ def estado_barra(char: str, contexto: Dict) -> Tuple[str, bool]:
     return "inicial", False
 
 
-def _finalizar(contexto: Dict, estado: str) -> None:
+def _finalizar(contexto: dict, estado: str) -> None:
     """Finaliza a análise léxica: emite token pendente e valida parênteses.
 
     Chamada após consumir todos os caracteres da linha. Se o AFD parou
@@ -333,7 +332,7 @@ def _finalizar(contexto: Dict, estado: str) -> None:
         raise Erros(f"Linha {contexto['linha']}: parênteses desbalanceados")
 
 
-def tokenizar_linha(linha: str, numero_linha: int = 1) -> List[Token]:
+def tokenizar_linha(linha: str, numero_linha: int = 1) -> list[Token]:
     """Função principal do analisador léxico — tokeniza uma linha de expressão RPN.
 
     Implementa o motor do AFD usando um dicionário que mapeia nomes de estado

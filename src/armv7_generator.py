@@ -17,14 +17,14 @@
 # Saída no display HEX (HEX3–HEX0) via endereço 0xFF200020
 
 
-from typing import Dict, List, Set
+
 
 def _normalizar_nome_mem(nome: str) -> str:
     """Normaliza nome de memória para minúsculas (rótulos no Assembly)."""
     return nome.lower()
 
 
-def _coletar_memorias(no: Dict, memorias: Set[str]) -> None:
+def _coletar_memorias(no: dict, memorias: set[str]) -> None:
     """Percorre a AST recursivamente coletando nomes de variáveis de memória.
 
     Necessário para pré-declarar todas as variáveis na seção .data
@@ -48,13 +48,13 @@ def _coletar_memorias(no: Dict, memorias: Set[str]) -> None:
 #   POP {r4, r5} + VMOV dN, r4, r5     → desempilha para registrador dN
 
 
-def _emit_push_d0(linhas: List[str]) -> None:
+def _emit_push_d0(linhas: list[str]) -> None:
     """Emite instruções para empilhar d0 (IEEE 754 64 bits) na pilha ARM."""
     linhas.append("    VMOV r4, r5, d0")
     linhas.append("    PUSH {r4, r5}")
 
 
-def _emit_pop_para_d(linhas: List[str], reg_d: str) -> None:
+def _emit_pop_para_d(linhas: list[str], reg_d: str) -> None:
     """Emite instruções para desempilhar da pilha ARM para registrador FP."""
     linhas.append("    POP {r4, r5}")
     linhas.append(f"    VMOV {reg_d}, r4, r5")
@@ -67,10 +67,10 @@ def _emit_pop_para_d(linhas: List[str], reg_d: str) -> None:
 
 
 def _emit_expressao(
-    no: Dict,
-    linhas: List[str],
-    mapa_constantes: Dict[str, str],
-    contador_constantes: List[int],
+    no: dict,
+    linhas: list[str],
+    mapa_constantes: dict[str, str],
+    contador_constantes: list[int],
     indice_linha: int,
 ) -> None:
     """Gera instruções Assembly para um nó da AST, recursivamente.
@@ -168,7 +168,7 @@ def _emit_expressao(
 # Função principal de geração — monta o Assembly ARMv7 completo
 
 
-def gerar_assembly_armv7(arvores: List[Dict]) -> str:
+def gerar_assembly_armv7(arvores: list[dict]) -> str:
     """Gera código Assembly ARMv7 completo para todas as expressões.
 
     O código gerado inclui:
@@ -188,14 +188,14 @@ def gerar_assembly_armv7(arvores: List[Dict]) -> str:
         String com o código Assembly ARMv7 completo e funcional.
     """
     # Coleta todas as variáveis de memória para pré-declará-las na seção .data
-    memorias: Set[str] = set()
+    memorias: set[str] = set()
     for arvore in arvores:
         _coletar_memorias(arvore, memorias)
 
     # =================================================================
     # Seção .text — diretivas de configuração para ARMv7 DE1-SoC v16.1
     # =================================================================
-    linhas: List[str] = []
+    linhas: list[str] = []
     linhas.append(".syntax unified")    # Sintaxe ARM unificada (UAL)
     linhas.append(".cpu cortex-a9")     # Processador do DE1-SoC
     linhas.append(".fpu vfpv3")         # FPU com suporte a F64 (IEEE 754)
@@ -205,7 +205,7 @@ def gerar_assembly_armv7(arvores: List[Dict]) -> str:
     linhas.append("_start:")
 
     # Mapa de constantes para deduplicação (mesmo valor = mesmo rótulo)
-    mapa_constantes: Dict[str, str] = {}
+    mapa_constantes: dict[str, str] = {}
     contador_constantes = [0]  # Lista para permitir mutação dentro da recursão
 
     # Gera instruções para cada expressão do arquivo de entrada
